@@ -1,10 +1,12 @@
 import numpy as np
+import random
 
 class Vehicle:
     def __init__(self, config={}):
         # Set default configuration
         self.set_default_config()
-
+        shapes = {"rectangle", "circle", "triangle"}
+        self.shape = random.choice(list(shapes))  # Randomly choose a shape
         # Update configuration
         for attr, val in config.items():
             setattr(self, attr, val)
@@ -29,17 +31,17 @@ class Vehicle:
         self.stopped = False
 
     def init_properties(self):
-        self.sqrt_ab = 2*np.sqrt(self.a_max*self.b_max)
+        self.sqrt_ab = 2 * np.sqrt(self.a_max * self.b_max)
         self._v_max = self.v_max
 
     def update(self, lead, dt):
         # Update position and velocity
-        if self.v + self.a*dt < 0:
-            self.x -= 1/2*self.v*self.v/self.a
+        if self.v + self.a * dt < 0:
+            self.x -= 1 / 2 * self.v * self.v / self.a
             self.v = 0
         else:
-            self.v += self.a*dt
-            self.x += self.v*dt + self.a*dt*dt/2
+            self.v += self.a * dt
+            self.x += self.v * dt + self.a * dt * dt / 2
         
         # Update acceleration
         alpha = 0
@@ -47,12 +49,12 @@ class Vehicle:
             delta_x = lead.x - self.x - lead.l
             delta_v = self.v - lead.v
 
-            alpha = (self.s0 + max(0, self.T*self.v + delta_v*self.v/self.sqrt_ab)) / delta_x
+            alpha = (self.s0 + max(0, self.T * self.v + delta_v * self.v / self.sqrt_ab)) / delta_x
 
-        self.a = self.a_max * (1-(self.v/self.v_max)**4 - alpha**2)
+        self.a = self.a_max * (1 - (self.v / self.v_max) ** 4 - alpha ** 2)
 
         if self.stopped: 
-            self.a = -self.b_max*self.v/self.v_max
+            self.a = -self.b_max * self.v / self.v_max
         
     def stop(self):
         self.stopped = True
@@ -65,5 +67,27 @@ class Vehicle:
 
     def unslow(self):
         self.v_max = self._v_max
-        
 
+    def get_svg_shape(self):
+        """Generate SVG polygon path for the vehicle shape."""
+        if self.shape == "rectangle":
+            # Rectangle polygon points
+            return '<polygon points="0,0 100,0 100,50 0,50" style="fill:blue;stroke:black;stroke-width:2"/>'
+        elif self.shape == "circle":
+            # Simulating a circle using many points (approximation)
+            points = " ".join(
+                f"{50 + 40*np.cos(theta)},{25 + 20*np.sin(theta)}"
+                for theta in np.linspace(0, 2*np.pi, num=30, endpoint=False)
+            )
+            return f'<polygon points="{points}" style="fill:red;stroke:black;stroke-width:2"/>'
+        elif self.shape == "triangle":
+            # Triangle polygon points
+            return '<polygon points="50,0 100,50 0,50" style="fill:green;stroke:black;stroke-width:2"/>'
+        else:
+            return "<!-- Unknown shape -->"
+
+# Example usage
+vehicle = Vehicle()
+print(f"Vehicle shape: {vehicle.shape}")
+svg = vehicle.get_svg_shape()
+print(f"SVG for shape:\n{svg}")

@@ -2,164 +2,120 @@ from trafficSimulator import *
 
 sim = Simulation()
 
-a = 1.85  # Half lane width
-b = 12    # Offset from the center of the intersection
-l = 500   # Length of incoming/outgoing roads
+n = 15
+a = 2
+b = 12
+l = 500
 
-# Define lane offsets for four lanes
-lane_offsets = [3*a, a, -a, -3*a]
+# Nodes
+WEST_RIGHT_START = (-b - l, a)
+WEST_LEFT_START = (-b - l, -a)
 
-roads = []
+SOUTH_RIGHT_START = (a, b + l)
+SOUTH_LEFT_START = (-a, b + l)
 
-# Function to create inbound and outbound lanes for a side
-def create_side_roads(side, b, l, lane_offsets, roads):
-    INBOUND_LANE_INDICES = []
-    OUTBOUND_LANE_INDICES = []
+EAST_RIGHT_START = (b + l, -a)
+EAST_LEFT_START = (b + l, a)
 
-    for lane_pos in lane_offsets:
-        if side == 'WEST':
-            inbound_start = (-b - l, lane_pos)
-            inbound_end = (-b, lane_pos)
-            outbound_start = (-b, lane_pos)
-            outbound_end = (-b - l, lane_pos)
-        elif side == 'SOUTH':
-            inbound_start = (lane_pos, b + l)
-            inbound_end = (lane_pos, b)
-            outbound_start = (lane_pos, b)
-            outbound_end = (lane_pos, b + l)
-        elif side == 'EAST':
-            inbound_start = (b + l, -lane_pos)
-            inbound_end = (b, -lane_pos)
-            outbound_start = (b, -lane_pos)
-            outbound_end = (b + l, -lane_pos)
-        elif side == 'NORTH':
-            inbound_start = (-lane_pos, -b - l)
-            inbound_end = (-lane_pos, -b)
-            outbound_start = (-lane_pos, -b)
-            outbound_end = (-lane_pos, -b - l)
-        else:
-            raise ValueError('Invalid side')
+NORTH_RIGHT_START = (-a, -b - l)
+NORTH_LEFT_START = (a, -b - l)
 
-        roads.append((inbound_start, inbound_end))
-        INBOUND_LANE_INDICES.append(len(roads) - 1)
+WEST_RIGHT = (-b, a)
+WEST_LEFT = (-b, -a)
 
-        roads.append((outbound_start, outbound_end))
-        OUTBOUND_LANE_INDICES.append(len(roads) - 1)
+SOUTH_RIGHT = (a, b)
+SOUTH_LEFT = (-a, b)
 
-    return INBOUND_LANE_INDICES, OUTBOUND_LANE_INDICES
+EAST_RIGHT = (b, -a)
+EAST_LEFT = (b, a)
 
-# Create roads for all sides
-WEST_INBOUND_LANE_INDICES, WEST_OUTBOUND_LANE_INDICES = create_side_roads('WEST', b, l, lane_offsets, roads)
-SOUTH_INBOUND_LANE_INDICES, SOUTH_OUTBOUND_LANE_INDICES = create_side_roads('SOUTH', b, l, lane_offsets, roads)
-EAST_INBOUND_LANE_INDICES, EAST_OUTBOUND_LANE_INDICES = create_side_roads('EAST', b, l, lane_offsets, roads)
-NORTH_INBOUND_LANE_INDICES, NORTH_OUTBOUND_LANE_INDICES = create_side_roads('NORTH', b, l, lane_offsets, roads)
+NORTH_RIGHT = (-a, -b)
+NORTH_LEFT = (a, -b)
 
-# Create straight roads through the intersection
-for i in range(4):
-    # West to East
-    start = roads[WEST_INBOUND_LANE_INDICES[i]][1]
-    end = roads[EAST_OUTBOUND_LANE_INDICES[i]][0]
-    roads.append((start, end))
+# Roads
+WEST_INBOUND = (WEST_RIGHT_START, WEST_RIGHT)
+SOUTH_INBOUND = (SOUTH_RIGHT_START, SOUTH_RIGHT)
+EAST_INBOUND = (EAST_RIGHT_START, EAST_RIGHT)
+NORTH_INBOUND = (NORTH_RIGHT_START, NORTH_RIGHT)
 
-    # South to North
-    start = roads[SOUTH_INBOUND_LANE_INDICES[i]][1]
-    end = roads[NORTH_OUTBOUND_LANE_INDICES[i]][0]
-    roads.append((start, end))
+WEST_OUTBOUND = (WEST_LEFT, WEST_LEFT_START)
+SOUTH_OUTBOUND = (SOUTH_LEFT, SOUTH_LEFT_START)
+EAST_OUTBOUND = (EAST_LEFT, EAST_LEFT_START)
+NORTH_OUTBOUND = (NORTH_LEFT, NORTH_LEFT_START)
 
-    # East to West
-    start = roads[EAST_INBOUND_LANE_INDICES[i]][1]
-    end = roads[WEST_OUTBOUND_LANE_INDICES[i]][0]
-    roads.append((start, end))
+WEST_STRAIGHT = (WEST_RIGHT, EAST_LEFT)
+SOUTH_STRAIGHT = (SOUTH_RIGHT, NORTH_LEFT)
+EAST_STRAIGHT = (EAST_RIGHT, WEST_LEFT)
+NORTH_STRAIGHT = (NORTH_RIGHT, SOUTH_LEFT)
 
-    # North to South
-    start = roads[NORTH_INBOUND_LANE_INDICES[i]][1]
-    end = roads[SOUTH_OUTBOUND_LANE_INDICES[i]][0]
-    roads.append((start, end))
+WEST_RIGHT_TURN = turn_road(WEST_RIGHT, SOUTH_LEFT, TURN_RIGHT, n)
+WEST_LEFT_TURN = turn_road(WEST_RIGHT, NORTH_LEFT, TURN_LEFT, n)
 
-# Create right turn roads
-# Create right turn roads
-def create_right_turn(start_lane_indices, end_lane_indices, turn_direction):
-    turn_roads = []
-    for i in range(4):
-        start = roads[start_lane_indices[i]][1]
-        end = roads[end_lane_indices[i]][0]
-        # Corrected keyword argument
-        turn_road_points = turn_road(start, end, turn_direction, resolution=15)
-        turn_roads.extend(turn_road_points)
-    return turn_roads
+SOUTH_RIGHT_TURN = turn_road(SOUTH_RIGHT, EAST_LEFT, TURN_RIGHT, n)
+SOUTH_LEFT_TURN = turn_road(SOUTH_RIGHT, WEST_LEFT, TURN_LEFT, n)
+
+EAST_RIGHT_TURN = turn_road(EAST_RIGHT, NORTH_LEFT, TURN_RIGHT, n)
+EAST_LEFT_TURN = turn_road(EAST_RIGHT, SOUTH_LEFT, TURN_LEFT, n)
+
+NORTH_RIGHT_TURN = turn_road(NORTH_RIGHT, WEST_LEFT, TURN_RIGHT, n)
+NORTH_LEFT_TURN = turn_road(NORTH_RIGHT, EAST_LEFT, TURN_LEFT, n)
+
+sim.create_roads([
+    WEST_INBOUND,
+    SOUTH_INBOUND,
+    EAST_INBOUND,
+    NORTH_INBOUND,
+
+    WEST_OUTBOUND,
+    SOUTH_OUTBOUND,
+    EAST_OUTBOUND,
+    NORTH_OUTBOUND,
+
+    WEST_STRAIGHT,
+    SOUTH_STRAIGHT,
+    EAST_STRAIGHT,
+    NORTH_STRAIGHT,
+
+    *WEST_RIGHT_TURN,
+    *WEST_LEFT_TURN,
+
+    *SOUTH_RIGHT_TURN,
+    *SOUTH_LEFT_TURN,
+
+    *EAST_RIGHT_TURN,
+    *EAST_LEFT_TURN,
+
+    *NORTH_RIGHT_TURN,
+    *NORTH_LEFT_TURN
+])
 
 
-# Define TURN_LEFT and TURN_RIGHT constants
-TURN_LEFT = 0
-TURN_RIGHT = 1
+def road(a):
+    return range(a, a + n)
 
-# Create turning roads for all directions
-turn_roads = []
 
-# West Right Turn to South
-turn_roads.extend(create_right_turn(WEST_INBOUND_LANE_INDICES, SOUTH_OUTBOUND_LANE_INDICES, TURN_RIGHT))
-
-# South Right Turn to East
-turn_roads.extend(create_right_turn(SOUTH_INBOUND_LANE_INDICES, EAST_OUTBOUND_LANE_INDICES, TURN_RIGHT))
-
-# East Right Turn to North
-turn_roads.extend(create_right_turn(EAST_INBOUND_LANE_INDICES, NORTH_OUTBOUND_LANE_INDICES, TURN_RIGHT))
-
-# North Right Turn to West
-turn_roads.extend(create_right_turn(NORTH_INBOUND_LANE_INDICES, WEST_OUTBOUND_LANE_INDICES, TURN_RIGHT))
-
-# Add all roads to the simulation
-sim.create_roads(roads + turn_roads)
-
-# Vehicle generation logic
-# Vehicle generation logic
+# Traffic distribution
 sim.create_gen({
     'vehicle_rate': 30,
     'vehicles': [
-        # West to East, West to North (Leftmost lanes handle left or straight)
-        [3, {'path': [WEST_INBOUND_LANE_INDICES[0], len(roads) - 8, EAST_OUTBOUND_LANE_INDICES[0]]}],  # Straight
-        [3, {'path': [WEST_INBOUND_LANE_INDICES[0], *turn_roads[:15]]}],  # Left turn to North
-        [3, {'path': [WEST_INBOUND_LANE_INDICES[1], len(roads) - 8, EAST_OUTBOUND_LANE_INDICES[1]]}],  # Straight
+        [3, {'path': [0, 8, 6]}],
+        [1, {'path': [0, *road(12), 5]}],
+        [1, {'path': [0, *road(12 + n), 7]}],
 
-        # West to East, West to South (Rightmost lanes handle right or straight)
-        [3, {'path': [WEST_INBOUND_LANE_INDICES[2], len(roads) - 8, EAST_OUTBOUND_LANE_INDICES[2]]}],  # Straight
-        [3, {'path': [WEST_INBOUND_LANE_INDICES[3], *turn_roads[15:30]]}],  # Right turn to South
+        [1, {'path': [1, 9, 7]}],
+        [0, {'path': [1, *road(12 + 2 * n), 6]}],
+        [1, {'path': [1, *road(12 + 3 * n), 4]}],
 
-        # South to North, South to West (Leftmost lanes handle left or straight)
-        [3, {'path': [SOUTH_INBOUND_LANE_INDICES[0], len(roads) - 7, NORTH_OUTBOUND_LANE_INDICES[0]]}],  # Straight
-        [3, {'path': [SOUTH_INBOUND_LANE_INDICES[0], *turn_roads[30:45]]}],  # Left turn to West
-        [3, {'path': [SOUTH_INBOUND_LANE_INDICES[1], len(roads) - 7, NORTH_OUTBOUND_LANE_INDICES[1]]}],  # Straight
+        [3, {'path': [2, 10, 4]}],
+        [1, {'path': [2, *road(12 + 4 * n), 7]}],
+        [1, {'path': [2, *road(12 + 5 * n), 5]}],
 
-        # South to North, South to East (Rightmost lanes handle right or straight)
-        [3, {'path': [SOUTH_INBOUND_LANE_INDICES[2], len(roads) - 7, NORTH_OUTBOUND_LANE_INDICES[2]]}],  # Straight
-        [3, {'path': [SOUTH_INBOUND_LANE_INDICES[3], *turn_roads[45:60]]}],  # Right turn to East
+        [1, {'path': [3, 11, 5]}],
+        [0, {'path': [3, *road(12 + 6 * n), 4]}],
+        [1, {'path': [3, *road(12 + 7 * n), 6]}]
+    ]})
 
-        # East to West, East to South (Leftmost lanes handle left or straight)
-        [3, {'path': [EAST_INBOUND_LANE_INDICES[0], len(roads) - 6, WEST_OUTBOUND_LANE_INDICES[0]]}],  # Straight
-        [3, {'path': [EAST_INBOUND_LANE_INDICES[0], *turn_roads[60:75]]}],  # Left turn to South
-        [3, {'path': [EAST_INBOUND_LANE_INDICES[1], len(roads) - 6, WEST_OUTBOUND_LANE_INDICES[1]]}],  # Straight
-
-        # East to West, East to North (Rightmost lanes handle right or straight)
-        [3, {'path': [EAST_INBOUND_LANE_INDICES[2], len(roads) - 6, WEST_OUTBOUND_LANE_INDICES[2]]}],  # Straight
-        [3, {'path': [EAST_INBOUND_LANE_INDICES[3], *turn_roads[75:90]]}],  # Right turn to North
-
-        # North to South, North to East (Leftmost lanes handle left or straight)
-        [3, {'path': [NORTH_INBOUND_LANE_INDICES[0], len(roads) - 5, SOUTH_OUTBOUND_LANE_INDICES[0]]}],  # Straight
-        [3, {'path': [NORTH_INBOUND_LANE_INDICES[0], *turn_roads[90:105]]}],  # Left turn to East
-        [3, {'path': [NORTH_INBOUND_LANE_INDICES[1], len(roads) - 5, SOUTH_OUTBOUND_LANE_INDICES[1]]}],  # Straight
-
-        # North to South, North to West (Rightmost lanes handle right or straight)
-        [3, {'path': [NORTH_INBOUND_LANE_INDICES[2], len(roads) - 5, SOUTH_OUTBOUND_LANE_INDICES[2]]}],  # Straight
-        [3, {'path': [NORTH_INBOUND_LANE_INDICES[3], *turn_roads[105:120]]}],  # Right turn to West
-    ]
-})
-
-
-# Traffic signal controlling all inbound lanes
-sim.create_signal([
-    WEST_INBOUND_LANE_INDICES + SOUTH_INBOUND_LANE_INDICES,
-    EAST_INBOUND_LANE_INDICES + NORTH_INBOUND_LANE_INDICES
-])
+sim.create_signal([[1, 3], [0, 2]])
 
 # Start simulation
 win = Window(sim)
