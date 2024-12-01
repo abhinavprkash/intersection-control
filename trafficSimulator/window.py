@@ -5,7 +5,7 @@ from pygame import gfxdraw
 import numpy as np
 
 import random
-
+import math
  
 
 class Window:
@@ -537,7 +537,7 @@ class Window:
             # Draw road background
             self.rotated_box(
                 road.start,
-                (road.length, 10.7),
+                (road.length, 3.7),
                 cos=road.angle_cos,
                 sin=road.angle_sin,
                 color=(180, 180, 220),
@@ -641,64 +641,57 @@ class Window:
 
  
 
+
     def draw_vehicle(self, vehicle, road, type = 'circle'):
-
         l, h = vehicle.l,  3
-
         sin, cos = road.angle_sin, road.angle_cos
 
- 
-
-        x = road.start[0] + cos * vehicle.x
-
-        y = road.start[1] + sin * vehicle.x
-
-        radius = vehicle.l / 2
-
+        x = road.start[0] + cos * vehicle.x 
+        y = road.start[1] + sin * vehicle.x 
+        radius = vehicle.l / 2 
         if(vehicle.shape == 'circle'):
-
             self.circle(self.convert((x, y)), int(radius * self.zoom), (0, 0, 255))
-
         elif(vehicle.shape == 'rectangle'):
-
             self.rotated_rect((x, y), (l, h), cos=cos, sin=sin, centered=True)
-
         elif(vehicle.shape == 'triangle'):
-
             half_base = l / 2
-
             height = h
 
- 
-
             # Calculate vertices relative to the center position (x, y)
-
             top_vertex = (x + cos * height, y + sin * height)
-
             bottom_left_vertex = (x - cos * height / 2 - sin * half_base, y - sin * height / 2 + cos * half_base)
-
             bottom_right_vertex = (x - cos * height / 2 + sin * half_base, y - sin * height / 2 - cos * half_base)
 
- 
-
             # Convert vertices to the screen coordinates
-
             vertices = [
-
                 self.convert(top_vertex),
-
                 self.convert(bottom_left_vertex),
-
                 self.convert(bottom_right_vertex)
-
             ]
 
- 
-
             # Draw the triangle as a polygon
-
-
             self.polygon(vertices, (255, 0, 0), filled=True)
+        elif(vehicle.shape == 'car'):
+            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/car.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
+            angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
+            rotated_image = pygame.transform.rotate(self.car_image, angle)
+            rect = rotated_image.get_rect(center=self.convert((x, y)))
+            self.screen.blit(rotated_image, rect.topleft)
+        elif(vehicle.shape == 'truck'):
+            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/truck.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.transform.scale(self.car_image, (int(l * 2.4 * self.zoom), int(h * 1.4 * self.zoom)))
+            angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
+            rotated_image = pygame.transform.rotate(self.car_image, angle)
+            rect = rotated_image.get_rect(center=self.convert((x, y)))
+            self.screen.blit(rotated_image, rect.topleft)
+        elif(vehicle.shape == 'bike'):
+            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/bike.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
+            angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
+            rotated_image = pygame.transform.rotate(self.car_image, angle)
+            rect = rotated_image.get_rect(center=self.convert((x, y)))
+            self.screen.blit(rotated_image, rect.topleft)
 
     def draw_vehicles(self):
 

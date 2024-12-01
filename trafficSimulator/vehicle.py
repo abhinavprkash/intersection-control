@@ -5,8 +5,8 @@ class Vehicle:
     def __init__(self, config={}):
         # Set default configuration
         self.set_default_config()
-        shapes = {"rectangle", "circle", "triangle"}
-        self.shape = random.choice(list(shapes))  # Randomly choose a shape
+        shapes = ['car', 'truck', 'bike']
+        self.shape = random.choice(shapes)  # Randomly choose a shape
         # Update configuration
         for attr, val in config.items():
             setattr(self, attr, val)
@@ -88,6 +88,4 @@ class Vehicle:
 
 # Example usage
 vehicle = Vehicle()
-print(f"Vehicle shape: {vehicle.shape}")
 svg = vehicle.get_svg_shape()
-print(f"SVG for shape:\n{svg}")
