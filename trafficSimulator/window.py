@@ -672,21 +672,21 @@ class Window:
             # Draw the triangle as a polygon
             self.polygon(vertices, (255, 0, 0), filled=True)
         elif(vehicle.shape == 'car'):
-            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/car.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("car.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)
             rect = rotated_image.get_rect(center=self.convert((x, y)))
             self.screen.blit(rotated_image, rect.topleft)
         elif(vehicle.shape == 'truck'):
-            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/truck.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("truck.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 2.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)
             rect = rotated_image.get_rect(center=self.convert((x, y)))
             self.screen.blit(rotated_image, rect.topleft)
         elif(vehicle.shape == 'bike'):
-            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/bike.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("bike.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)

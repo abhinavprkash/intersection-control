@@ -315,4 +315,4 @@ sim.create_signal([[1, 3, 9, 11, 17, 19], [0, 2, 8, 10, 16, 18]])
 # Start simulation
 win = Window(sim)
 win.zoom = 5
-win.run(steps_per_update=7)
+win.run(steps_per_update=6)
