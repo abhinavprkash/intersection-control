@@ -40,7 +40,7 @@ class Window:
 
         self.height = 900
 
-        self.bg_color = (250, 250, 250)
+        self.bg_color = (144, 238, 144)
 
  
 
@@ -343,7 +343,7 @@ class Window:
 
  
 
-    def arrow(self, pos, size, angle=None, cos=None, sin=None, color=(150, 150, 190)):
+    def arrow(self, pos, size, angle=None, cos=None, sin=None, color=(255, 255, 0)):
 
         if angle:
 
@@ -540,13 +540,13 @@ class Window:
                 (road.length, 3.7),
                 cos=road.angle_cos,
                 sin=road.angle_sin,
-                color=(180, 180, 220),
+                color=(136, 136, 136),
                 centered=False
             )
 
             # Draw road arrow
             if road.length > 5:
-                for i in np.arange(-0.5 * road.length, 0.5 * road.length, 10):
+                for i in np.arange(-0.5 * road.length, 0.5 * road.length, 25):
                     pos = (
                         road.start[0] + (road.length / 2 + i + 3) * road.angle_cos,
                         road.start[1] + (road.length / 2 + i + 3) * road.angle_sin
@@ -672,21 +672,21 @@ class Window:
             # Draw the triangle as a polygon
             self.polygon(vertices, (255, 0, 0), filled=True)
         elif(vehicle.shape == 'car'):
-            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/car.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/car.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)
             rect = rotated_image.get_rect(center=self.convert((x, y)))
             self.screen.blit(rotated_image, rect.topleft)
         elif(vehicle.shape == 'truck'):
-            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/truck.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/truck.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 2.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)
             rect = rotated_image.get_rect(center=self.convert((x, y)))
             self.screen.blit(rotated_image, rect.topleft)
         elif(vehicle.shape == 'bike'):
-            self.car_image = pygame.image.load("/Users/arshgoyal/Desktop/Adaptive-Traffic-Control/bike.svg").convert_alpha()  # Load the car image
+            self.car_image = pygame.image.load("/Users/anjali/Desktop/USC_Courses/Sem3/CSCI/intersection-control/bike.svg").convert_alpha()  # Load the car image
             self.car_image = pygame.transform.scale(self.car_image, (int(l * 1.4 * self.zoom), int(h * 1.4 * self.zoom)))
             angle = -math.degrees(math.atan2(sin, cos))  # Convert to degrees
             rotated_image = pygame.transform.rotate(self.car_image, angle)
@@ -756,12 +756,12 @@ class Window:
     def draw_grassland(self):
         """Draws a green grassland background with fixed dots for texture."""
         # Fill the entire screen with a green base color
-        self.screen.fill((34, 139, 34))  # Green color for grassland
+        self.screen.fill((144, 238, 144))  # Green color for grassland
 
         # Add fixed dots to simulate grass texture
         dot_spacing = 20  # Spacing between dots
         dot_size = 1  # Size of the dots
-        dot_colors = [(0, 100, 0), (0, 128, 0), (0, 150, 0)]  # Varying shades of green
+        dot_colors = [(0, 144, 0), (0, 238, 0), (0, 144, 0)]  # Varying shades of green
 
         for x in range(0, self.width, dot_spacing):
             for y in range(0, self.height, dot_spacing):

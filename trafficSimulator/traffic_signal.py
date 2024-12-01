@@ -18,7 +18,7 @@ class TrafficSignal:
         self.vehicles_passed = 0
 
     def set_default_config(self):
-        self.cycle = [(True, False), (False, True)]
+        self.cycle = [(True, False), (False, True), [False, False]]
         self.fixed_flag = True
         self.adjust_flag = False
         self.cycle_length_1 = 30
@@ -28,6 +28,9 @@ class TrafficSignal:
         self.stop_distance = 15
         self.current_cycle_index = 0
         self.time_off = 0
+
+        self.time_steps_passed = 0
+        self.new_cycle_index = -1
 
     def init_properties(self):
         for i in range(len(self.roads)):
@@ -53,6 +56,14 @@ class TrafficSignal:
                 temp = 0
 
         if not self.fixed_flag:
+            if(self.current_cycle_index == 2):
+                if(self.time_steps_passed != 200):
+                    self.time_steps_passed += 1
+                else:
+                    self.current_cycle_index = self.new_cycle_index
+                    self.time_steps_passed = 0
+                    self.new_cycle_index = -1
+
             if (temp > self.cycle_length_1) and (self.current_cycle_index == 0):
                 # Step 2: 2nd and 4th signals green
                 # Number of cars near 2st and 4rd signals
@@ -72,7 +83,10 @@ class TrafficSignal:
                     self.cycle_length_2 = 75
 
                 self.time_off = sim.t
-                self.current_cycle_index = 1
+                # self.current_cycle_index = 1
+                self.new_cycle_index = 1
+                self.current_cycle_index = 2
+
                 self.adjust_flag = True
                 temp = 0
 
@@ -112,7 +126,10 @@ class TrafficSignal:
                     self.cycle_length_1 = 75
 
                 self.time_off = sim.t
-                self.current_cycle_index = 0
+                # self.current_cycle_index = 0
+                self.new_cycle_index = 0
+                self.current_cycle_index = 2
+
                 self.adjust_flag = True
                 temp = 0
 
