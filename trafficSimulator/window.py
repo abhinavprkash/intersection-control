@@ -543,6 +543,7 @@ class Window:
                 color=(136, 136, 136),
                 centered=False
             )
+           
 
             # Draw road arrow
             if road.length > 5:
@@ -558,6 +559,25 @@ class Window:
                         cos=road.angle_cos,
                         sin=road.angle_sin
                     )
+                
+            # Add lane divider after every 3 roads
+            if True:  # Divider after the 3rd road
+                divider_width = 0.1  # Thickness of the divider
+                divider_offset = -14  # Offset from the center of the 3rd road
+
+                # Position of the divider
+                divider_start = (
+                    -1,
+                    1
+                )
+                self.rotated_box(
+                    divider_start,
+                    (road.length, divider_width),
+                    cos=road.angle_cos,
+                    sin=road.angle_sin,
+                    color=(250, 250, 250),  # White color for divider
+                    centered=False
+                )
 
             # Add trees along the road, avoiding intersections
             tree_spacing = 20  # Distance between trees
@@ -739,19 +759,19 @@ class Window:
 
     def draw_status(self):
 
-        text_fps = self.text_font.render(f't={self.sim.t:.2f}s', False, (0, 0, 0))
+        text_fps = self.text_font.render(f'Intersection Control', False, (0, 0, 0))
 
-        text_frc = self.text_font.render(f'n={self.sim.frame_count}', False, (0, 0, 0))
+        # text_frc = self.text_font.render(f'n={self.sim.frame_count}', False, (0, 0, 0))
 
-        text_cars = self.text_font.render(f'Vehicles passed: {self.sim.traffic_signals[0].vehicles_passed}', False, (0, 0, 0))
+        # text_cars = self.text_font.render(f'Vehicles passed: {self.sim.traffic_signals[0].vehicles_passed}', False, (0, 0, 0))
 
        
 
         self.screen.blit(text_fps, (0, 0))
 
-        self.screen.blit(text_frc, (100, 0))
+        # self.screen.blit(text_frc, (100, 0))
 
-        self.screen.blit(text_cars, (0, 30))
+        # self.screen.blit(text_cars, (0, 30))
 
     def draw_grassland(self):
         """Draws a green grassland background with fixed dots for texture."""
