@@ -19,6 +19,7 @@ class TrafficSignal:
 
     def set_default_config(self):
         self.cycle = [(True, False), (False, True), [False, False]]
+        self.cycle = [(True, False, False), (False, True, False), [False, False, False]] #sep signal for left
         self.fixed_flag = True
         self.adjust_flag = False
         self.cycle_length_1 = 30

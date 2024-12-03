@@ -311,6 +311,7 @@ sim.create_gen({
     ]})
 
 sim.create_signal([[1, 3, 9, 11, 17, 19], [0, 2, 8, 10, 16, 18]])
+# sim.create_signal([[9, 11, 17, 19], [8, 10, 16, 18], [0, 2, 1, 3]]) # #sep signal for left
 
 # Start simulation
 win = Window(sim)
