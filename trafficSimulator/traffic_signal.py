@@ -18,12 +18,18 @@ class TrafficSignal:
         self.vehicles_passed = 0
 
     def set_default_config(self):
-        self.cycle = [(True, False), (False, True), [False, False]]
-        self.cycle = [(True, False, False), (False, True, False), [False, False, False]] #sep signal for left
+        self.cycle = [
+            (True, False, False, False),  # Phase 0
+            (False, True, False, False),  # Phase 1
+            (False, False, True, False),  # Phase 2
+            (False, False, False, True)   # Phase 3
+        ]
         self.fixed_flag = True
         self.adjust_flag = False
         self.cycle_length_1 = 30
         self.cycle_length_2 = 30
+        self.cycle_length_3 = 30  # Added length for the new phase
+        self.cycle_length_4 = 30  # New phase (4th)
         self.slow_distance = 50
         self.slow_factor = 0.4
         self.stop_distance = 15
@@ -41,112 +47,99 @@ class TrafficSignal:
     @property
     def current_cycle(self):
         return self.cycle[self.current_cycle_index]
-    
+
     def update(self, sim):
         temp = sim.t - self.time_off
         if self.fixed_flag:
-            if (temp > self.cycle_length_1) and (self.current_cycle_index == 0):
+            if temp > self.cycle_length_1 and self.current_cycle_index == 0:
                 self.time_off = sim.t
                 self.current_cycle_index = 1
                 temp = 0
-                self.fixed_flag = False  # comment this to enable infinite non-adaptive state
                 return
-            if (temp > self.cycle_length_2) and (self.current_cycle_index == 1):
+            if temp > self.cycle_length_2 and self.current_cycle_index == 1:
+                self.time_off = sim.t
+                self.current_cycle_index = 2
+                temp = 0
+                return
+            if temp > self.cycle_length_3 and self.current_cycle_index == 2:
+                self.time_off = sim.t
+                self.current_cycle_index = 3
+                temp = 0
+                return
+            if temp > self.cycle_length_4 and self.current_cycle_index == 3:
                 self.time_off = sim.t
                 self.current_cycle_index = 0
                 temp = 0
 
         if not self.fixed_flag:
-            if(self.current_cycle_index == 2):
-                if(self.time_steps_passed != 200):
+            if self.current_cycle_index in (2, 3):
+                if self.time_steps_passed != 200:
                     self.time_steps_passed += 1
                 else:
                     self.current_cycle_index = self.new_cycle_index
                     self.time_steps_passed = 0
                     self.new_cycle_index = -1
 
-            if (temp > self.cycle_length_1) and (self.current_cycle_index == 0):
-                # Step 2: 2nd and 4th signals green
-                # Number of cars near 2st and 4rd signals
-                cars_number_1 = self.traffic_data[1][2] + 2 * (self.traffic_data[1][4] + self.traffic_data[1][5])
-                cars_number_3 = self.traffic_data[3][2] + 2 * (self.traffic_data[3][4] + self.traffic_data[3][5])
-                cars_number_13 = (cars_number_1 + cars_number_3) / 2
-                # Decision about the duration of green phase (2 and 4)
-                if cars_number_13 < 5:
-                    self.cycle_length_2 = 20
-                elif (cars_number_13 >= 5) and (cars_number_13 < 10):
-                    self.cycle_length_2 = 30
-                elif (cars_number_13 >= 10) and (cars_number_13 < 15):
-                    self.cycle_length_2 = 45
-                elif (cars_number_13 >= 15) and (cars_number_13 <= 20):
-                    self.cycle_length_2 = 60
-                elif cars_number_13 > 20:
-                    self.cycle_length_2 = 75
-
+            if temp > self.cycle_length_1 and self.current_cycle_index == 0:
+                self.adjust_green_phase(sim, 1, 3)  # Adjust for Phase 1
                 self.time_off = sim.t
-                # self.current_cycle_index = 1
                 self.new_cycle_index = 1
                 self.current_cycle_index = 2
-
-                self.adjust_flag = True
                 temp = 0
+                return
 
-            if (temp > self.cycle_length_2 // 2) and (self.current_cycle_index == 1) and (self.adjust_flag):
-                # Data about 1st and 3rd signals
-                cars_number_0 = self.traffic_data[0][2] + 2 * (self.traffic_data[0][4] + self.traffic_data[0][5])
-                cars_number_2 = self.traffic_data[2][2] + 2 * (self.traffic_data[2][4] + self.traffic_data[2][5])
-                cars_number_02 = (cars_number_0 + cars_number_2) / 2
-                # Data about 2st and 4rd signals
-                cars_number_1 = self.traffic_data[1][2] + 2 * (self.traffic_data[1][4] + self.traffic_data[1][5])
-                cars_number_3 = self.traffic_data[3][2] + 2 * (self.traffic_data[3][4] + self.traffic_data[3][5])
-                cars_number_13 = (cars_number_1 + cars_number_3) / 2
-                # Adjustment if more cars on the second road
-                if (cars_number_02 >= 10) and (cars_number_13 < 5):
-                    self.cycle_length_2 /= 1.5
-                # Adjustment if more cars on this road
-                if (cars_number_02 < 5) and (cars_number_13 >= 10):
-                    self.cycle_length_2 *= 1.5
-                self.adjust_flag = False
-
-            if (temp > self.cycle_length_2) and (self.current_cycle_index == 1):
-                # Step 1: 1st and 3rd signals green
-                # Number of cars near 1st and 3rd signals
-                cars_number_0 = self.traffic_data[0][2] + 2 * (self.traffic_data[0][4] + self.traffic_data[0][5])
-                cars_number_2 = self.traffic_data[2][2] + 2 * (self.traffic_data[2][4] + self.traffic_data[2][5])
-                cars_number_02 = (cars_number_0 + cars_number_2) / 2
-                # Decision about the duration of green phase (1 and 3)
-                if cars_number_02 < 5:
-                    self.cycle_length_1 = 15
-                elif (cars_number_02 >= 5) and (cars_number_02 < 10):
-                    self.cycle_length_1 = 30
-                elif (cars_number_02 >= 10) and (cars_number_02 < 15):
-                    self.cycle_length_1 = 45
-                elif (cars_number_02 >= 15) and (cars_number_02 <= 20):
-                    self.cycle_length_1 = 60
-                elif cars_number_02 > 20:
-                    self.cycle_length_1 = 75
-
+            if temp > self.cycle_length_2 and self.current_cycle_index == 1:
+                self.adjust_green_phase(sim, 2, 4)  # Adjust for Phase 2
                 self.time_off = sim.t
-                # self.current_cycle_index = 0
+                self.new_cycle_index = 2
+                self.current_cycle_index = 3
+                temp = 0
+                return
+
+            if temp > self.cycle_length_3 and self.current_cycle_index == 2:
+                self.adjust_green_phase(sim, 3, 0)  # Adjust for Phase 3
+                self.time_off = sim.t
+                self.new_cycle_index = 3
+                self.current_cycle_index = 0
+                temp = 0
+                return
+
+            if temp > self.cycle_length_4 and self.current_cycle_index == 3:
+                self.adjust_green_phase(sim, 4, 1)  # Adjust for Phase 4
+                self.time_off = sim.t
                 self.new_cycle_index = 0
                 self.current_cycle_index = 2
-
-                self.adjust_flag = True
                 temp = 0
+                return
 
-            if (temp > self.cycle_length_1 // 2) and (self.current_cycle_index == 0) and (self.adjust_flag):
-                # Data about 1st and 3rd signals
-                cars_number_0 = self.traffic_data[0][2] + 2 * (self.traffic_data[0][4] + self.traffic_data[0][5])
-                cars_number_2 = self.traffic_data[2][2] + 2 * (self.traffic_data[2][4] + self.traffic_data[2][5])
-                cars_number_02 = (cars_number_0 + cars_number_2) / 2
-                # Data about 2st and 4rd signals
-                cars_number_1 = self.traffic_data[1][2] + 2 * (self.traffic_data[1][4] + self.traffic_data[1][5])
-                cars_number_3 = self.traffic_data[3][2] + 2 * (self.traffic_data[3][4] + self.traffic_data[3][5])
-                cars_number_13 = (cars_number_1 + cars_number_3) / 2
-                # Adjustment if more cars on the second road
-                if (cars_number_13 >= 0) and (cars_number_02 < 5):
-                    self.cycle_length_1 /= 1.5
-                # Adjustment if more cars on this road
-                if (cars_number_13 < 5) and (cars_number_02 >= 0):
-                    self.cycle_length_1 *= 1.5
-                self.adjust_flag = False
+    def adjust_green_phase(self, sim, phase, next_phase):
+        # Calculate car density for current phase
+        if phase == 1:
+            cars_density = self.calculate_density([9, 11, 17, 19])  # Roads 1 and 3
+        elif phase == 2:
+            cars_density = self.calculate_density([8, 10, 16, 18])  # Roads 2 and 4
+        elif phase == 3:
+            cars_density = self.calculate_density([0, 2])  # Roads 1 and 2
+        elif phase == 4:
+            cars_density = self.calculate_density([1, 3])  # Roads 3 and 4
+
+        # Adjust cycle length based on car density
+        if cars_density < 5:
+            setattr(self, f"cycle_length_{phase}", 15)
+        elif 5 <= cars_density < 10:
+            setattr(self, f"cycle_length_{phase}", 30)
+        elif 10 <= cars_density < 15:
+            setattr(self, f"cycle_length_{phase}", 45)
+        elif 15 <= cars_density <= 20:
+            setattr(self, f"cycle_length_{phase}", 60)
+        else:
+            setattr(self, f"cycle_length_{phase}", 75)
+
+    def calculate_density(self, road_indices):
+        # Compute average density of cars on specified roads
+        total_density = 0
+        for road_index in road_indices:
+            total_density += self.traffic_data[road_index][2] + 2 * (
+                self.traffic_data[road_index][4] + self.traffic_data[road_index][5]
+            )
+        return total_density / len(road_indices)
